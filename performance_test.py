@@ -6,7 +6,7 @@ import gc
 from sort_by_color_mark import ColorSort, Item
 
 
-def test_perfomance():
+def test_perfomance(print_time_stat=False):
     def _func():
         """Выполнение сортировки 1000 маркированных элементов"""
         # Пример: накопление в глобальном списке
@@ -18,38 +18,35 @@ def test_perfomance():
             expected_list.extend([obj for obj in objects if obj.mark == color])
         assert result == expected_list
 
-    print("Выполняю функцию...")
     start = time.perf_counter()
     _func()
     work_time = time.perf_counter() - start
-    print(f"Время выполнения: {work_time:.4f} секунд")
-    print("Функция выполнена.")
+    if print_time_stat:
+        print(f"Время выполнения: {work_time:.4f} секунд")
+        print("Функция выполнена.")
     assert work_time < 1
 
 def main():
     pid = os.getpid()
     print(f"PID процесса: {pid} (для оценки памяти ps -p {pid} -o pid,rss,vsz)")
     test_perfomance()
-    # Запускаем трассировку памяти
-    tracemalloc.start()
-    # Делаем первый снимок до повторного вызова функции
-    snapshot_before = tracemalloc.take_snapshot()
 
     # Принудительно собираем мусор, чтобы временные объекты были удалены
     gc.collect()
-    print("Нажмите Enter, чтобы выполнить функцию потовторно и сравнить статистику использования памяти...")
+    print("Нажмите Enter, чтобы выполнить функцию потовторно 10 раз и сравнить статистику использования памяти...")
     input()
-    test_perfomance()
+    tracemalloc.start()  # Запускаем трассировку памяти
+    snap_prev = tracemalloc.take_snapshot()  # Делаем первый снимок до повторного вызова функции
 
-    # Делаем второй снимок после вызова и сборки мусора
-    snapshot_after = tracemalloc.take_snapshot()
-    tracemalloc.stop()
-
-    # Сравниваем снимки
-    top_stats = snapshot_after.compare_to(snapshot_before, 'lineno')
-    print("\nТоп-10 изменений в памяти (выделено – освобождено):")
-    for stat in top_stats[:10]:
-        print(stat)
+    for i in range(10):
+        test_perfomance()
+        gc.collect()
+        snap_curr = tracemalloc.take_snapshot()
+        diff = snap_curr.compare_to(snap_prev, 'lineno')
+        print(f"--- После итерации {i + 1} ---")
+        for stat in diff[:5]:
+            print(stat)
+        snap_prev = snap_curr
 
     print("Нажмите Enter, чтобы завершить программу (пока не нажимайте, чтобы проверить память).")
     input()
