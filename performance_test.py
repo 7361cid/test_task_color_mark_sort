@@ -29,7 +29,7 @@ def test_perfomance(print_time_stat=False):
 def main():
     pid = os.getpid()
     print(f"PID процесса: {pid} (для оценки памяти ps -p {pid} -o pid,rss,vsz)")
-    test_perfomance()
+    test_perfomance(True)
 
     # Принудительно собираем мусор, чтобы временные объекты были удалены
     gc.collect()
