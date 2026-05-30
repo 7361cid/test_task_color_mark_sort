@@ -15,10 +15,12 @@ def parse_user_input(sequence_str):
 
 
 def format_output_with_indices(items):
+    """Представление обработанных данных в формате метка(значение)"""
     return ', '.join(f"{item.mark}({item.value})" for item in items)
 
 
 def format_original_with_indices(sequence_str):
+    """Представление исходной последовательности в формате индекс:метка"""
     chars = list(sequence_str)
     parts = [f"{i}:{ch}" for i, ch in enumerate(chars)]
     return ", ".join(parts)
