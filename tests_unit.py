@@ -49,7 +49,6 @@ class TestReorderPositive(unittest.TestCase):
 
     def test_rule_with_spaces_but_valid(self):
         """TC-UNIT-POS-02: Правило с пробелами (валидно, проверяем что не падает)"""
-        # Должно работать без ошибок
         objects = [Item('К', 1), Item('С', 2), Item('З', 3)]
         result = ColorSort.reorder(objects, " К < З < С ")
         self.assertEqual(result, [Item('К', 1), Item('З', 3), Item('С', 2)])
@@ -74,21 +73,21 @@ class TestReorderPositive(unittest.TestCase):
         self.assertEqual(ColorSort.reorder(objects, rule), expected)
 
     def test_complex_objects(self):
-        """TC-UNIT-POS-06: Объекты с дополнительными полями"""
+        """TC-UNIT-POS-06: Объекты с дополнительными полями, и значениями разных типов"""
 
         class ExtraItem:
             def __init__(self, mark, name, val):
                 self.mark = mark
-                self.name = name
+                self.name = name  # допонительное поле
                 self.val = val
 
-            def __eq__(self, other):
+            def __eq__(self, other):  # для сравнения элементов
                 return (self.mark == other.mark and self.name == other.name
                         and self.val == other.val)
 
         obj1 = ExtraItem('К', 'a', 10)
-        obj2 = ExtraItem('С', 'b', 20)
-        obj3 = ExtraItem('К', 'c', 30)
+        obj2 = ExtraItem('С', 'b', '20')
+        obj3 = ExtraItem('К', 'c', [30])
         objects = [obj1, obj2, obj3]
         rule = "К<З<С"
         result = ColorSort.reorder(objects, rule)
@@ -111,22 +110,22 @@ class TestReorderNegative(unittest.TestCase):
 
     def test_mixed_operators(self):
         """TC-UNIT-NEG-03: Смешанные разделители в правиле"""
-        with self.assertRaisesRegex(ValueError, "одновременно"):
+        with self.assertRaisesRegex(ValueError, "Правило не должно содержать одновременно '<' и '>'"):
             ColorSort.reorder([], "К<З>С")
 
     def test_only_two_colors(self):
         """TC-UNIT-NEG-04: Только две метки в правиле"""
-        with self.assertRaisesRegex(ValueError, "ровно 3 метки"):
+        with self.assertRaisesRegex(ValueError, "Правило должно содержать ровно 3 метки"):
             ColorSort.reorder([], "К<З")
 
     def test_four_colors(self):
         """TC-UNIT-NEG-05: Четыре метки в правиле"""
-        with self.assertRaisesRegex(ValueError, "ровно 3 метки"):
+        with self.assertRaisesRegex(ValueError, "Правило должно содержать ровно 3 метки"):
             ColorSort.reorder([], "К<З<С<К")
 
     def test_duplicate_color(self):
         """TC-UNIT-NEG-06: Повторяющаяся метка в правиле"""
-        with self.assertRaisesRegex(ValueError, "повторяющиеся метки"):
+        with self.assertRaisesRegex(ValueError, "Правило содержит повторяющиеся метки"):
             ColorSort.reorder([], "К<З<К")
 
     def test_invalid_color_in_rule(self):
@@ -135,7 +134,7 @@ class TestReorderNegative(unittest.TestCase):
             ColorSort.reorder([], "К<З<Х")
 
     def test_invalid_color_in_rule_latin(self):
-        """TC-UNIT-NEG-08: Недопустимый латиннский символ в правиле схожий с валидным"""
+        """TC-UNIT-NEG-08: Недопустимый латинский символ в правиле схожий с валидным"""
         with self.assertRaisesRegex(ValueError, "Недопустимая метка в правиле: 'C' Проверьте раскладку клавиатуры."):
             ColorSort.reorder([], "К<З<C")
 

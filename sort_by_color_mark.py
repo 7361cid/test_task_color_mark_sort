@@ -5,8 +5,8 @@ ALLOWED_MARKS = {'К', 'З', 'С'}
 
 class Item:
     def __init__(self, mark, value):
-        self.mark = mark
-        self.value = value
+        self.mark = mark  # Атрибут для сортировки
+        self.value = value  # Тут может быть любое значение: число, строка, пользовательский тип данных
 
     def __repr__(self):
         return f"{self.mark}{self.value}"
@@ -18,7 +18,7 @@ class Item:
 class ColorSort:
     @staticmethod
     def check_symbol_for_similar_latin(symbol):
-        if symbol in ['K', 'C']:  # Символы на латинице похожие на кирилицу
+        if symbol in ['K', 'C']:  # Символы на латинице похожие на кириллицу
             return ' Проверьте раскладку клавиатуры'
         else:
             return ''
@@ -97,11 +97,5 @@ if __name__ == "__main__":
     ]
     rule = "К<З<С"
     print(ColorSort.reorder(data, rule))
-
-    rule2 = "С>З>К"
-    print(ColorSort.reorder(data, rule2))
-
-    rule3 = " С <  К  \n < \n  З <"
-    print(ColorSort.reorder(data, rule3))
 
 
