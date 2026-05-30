@@ -30,10 +30,6 @@ def main():
     pid = os.getpid()
     print(f"PID процесса: {pid} (для оценки памяти ps -p {pid} -o pid,rss,vsz)")
     test_perfomance()
-
-    print("Нажмите Enter, чтобы выполнить функцию...")
-    input()
-
     # Запускаем трассировку памяти
     tracemalloc.start()
     # Делаем первый снимок до повторного вызова функции
@@ -41,6 +37,10 @@ def main():
 
     # Принудительно собираем мусор, чтобы временные объекты были удалены
     gc.collect()
+    print("Нажмите Enter, чтобы выполнить функцию потовторно и сравнить статистику использования памяти...")
+    input()
+    test_perfomance()
+
     # Делаем второй снимок после вызова и сборки мусора
     snapshot_after = tracemalloc.take_snapshot()
     tracemalloc.stop()
