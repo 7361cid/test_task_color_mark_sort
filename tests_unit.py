@@ -81,10 +81,6 @@ class TestReorderPositive(unittest.TestCase):
                 self.name = name  # допонительное поле
                 self.val = val
 
-            def __eq__(self, other):  # для сравнения элементов
-                return (self.mark == other.mark and self.name == other.name
-                        and self.val == other.val)
-
         obj1 = ExtraItem('К', 'a', 10)
         obj2 = ExtraItem('С', 'b', '20')
         obj3 = ExtraItem('К', 'c', [30])
@@ -93,6 +89,12 @@ class TestReorderPositive(unittest.TestCase):
         result = ColorSort.reorder(objects, rule)
         self.assertEqual(result, [obj1, obj3, obj2])
 
+    def test_string_sort(self):
+        """TC-UNIT-POS-07: Сортировка строки"""
+        str_data = "КЗКСКЗ"
+        rule = "К<С<З"
+        expected = "КККСЗЗ"
+        self.assertEqual(ColorSort.reorder(str_data, rule), expected)
 
 class TestReorderNegative(unittest.TestCase):
     """Негативные тесты: ошибочные правила и недопустимые объекты"""
@@ -158,7 +160,7 @@ class TestReorderNegative(unittest.TestCase):
             pass
 
         obj = BadItem()
-        with self.assertRaises(AttributeError):
+        with self.assertRaises(ValueError):
             ColorSort.reorder([obj], "К<З<С")
 
 

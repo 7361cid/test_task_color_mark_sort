@@ -1,5 +1,3 @@
-import sys
-
 ALLOWED_MARKS = {'К', 'З', 'С'}
 
 
@@ -70,14 +68,15 @@ class ColorSort:
     @classmethod
     def reorder(cls, objects, rule):
         """
-        Переупорядочивает список объектов согласно правилу.
+        Переупорядочивает список объектов (objects - объекты с атрибутом mark, или строка),
+        Согласно правилу rule.
         Все объекты должны иметь метки только из {К, З, С}.
         """
         order = cls.parse_rule(rule)
         groups = {color: [] for color in order}
 
         for obj in objects:
-            mark = obj.mark
+            mark = getattr(obj, 'mark', obj)  # Проверка на наличие атрибута mark, иначе берер сам объект (для строк)
             if mark not in ALLOWED_MARKS:
                 extra_error_info = cls.check_symbol_for_similar_latin(mark)
                 raise ValueError(f"Недопустимая метка у объекта: '{mark}' {extra_error_info}. Допустимы: К, З, С")
@@ -86,6 +85,8 @@ class ColorSort:
         result = []
         for color in order:
             result.extend(groups[color])
+        if result and type(result[0]) == str:
+            return ''.join(result)
         return result
 
 
@@ -97,5 +98,5 @@ if __name__ == "__main__":
     ]
     rule = "К<З<С"
     print(ColorSort.reorder(data, rule))
-
+    print(ColorSort.reorder('КСЗЗКС', rule))
 

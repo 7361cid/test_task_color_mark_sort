@@ -1,16 +1,26 @@
 import sys
 from sort_by_color_mark import ColorSort, Item
 
+if len(sys.argv) > 1 and sys.argv[1] == 'show_order':
+    show_order = True
+else:
+    show_order = False
 
 def parse_user_input(sequence_str):
-    """Превращает строку в список Item, value = позиция."""
-    items = []
-    for idx, ch in enumerate(sequence_str):
+    """Валидация строки, в случае когда нужно показать порядок, выполняется обертка в
+    объект Item где value = позиция.
+    """
+    for ch in sequence_str:
         if ch not in ('К', 'З', 'С'):
             extra_error_msg = ColorSort.check_symbol_for_similar_latin(ch)
             raise ValueError(f"Недопустимый символ '{ch}'{extra_error_msg}. Допустимы: К, З, С")
-        items.append(Item(ch, idx))
-    return items
+
+    if show_order:
+        items = []
+        for idx, ch in enumerate(sequence_str):
+            items.append(Item(ch, idx))
+        return items
+    return sequence_str
 
 
 
@@ -19,11 +29,12 @@ def format_output_with_indices(items):
     return ', '.join(f"{item.mark}({item.value})" for item in items)
 
 
-def format_original_with_indices(sequence_str):
-    """Представление исходной последовательности в формате индекс:метка"""
+def print_original_with_indices(sequence_str):
+    """Вывод исходной последовательности в формате индекс:метка"""
+    print("\nИсходная последовательность (индекс:метка):")
     chars = list(sequence_str)
     parts = [f"{i}:{ch}" for i, ch in enumerate(chars)]
-    return ", ".join(parts)
+    print(", ".join(parts))
 
 
 def input_rule():
@@ -63,19 +74,21 @@ def main():
         try:
             rule = input_rule()
             seq_str = input_sequence()
-            print("\nИсходная последовательность (индекс:метка):")
-            print(format_original_with_indices(seq_str))
-
+            if show_order:
+                print_original_with_indices(seq_str)
             objects = parse_user_input(seq_str)
             sorted_objects = ColorSort.reorder(objects, rule)
 
-            print("\nРезультат сортировки (метка(исходный индекс)):")
-            print(format_output_with_indices(sorted_objects))
+            print("\nРезультат сортировки")
+            if show_order:
+                print("В формате (метка(исходный индекс)):")
+                print(format_output_with_indices(sorted_objects))
+                result_str = ''.join(obj.mark for obj in sorted_objects)
+                print(f"\nКратко (только метки): {result_str}")
+                print("\nПорядок внутри каждой группы сохраняется – видно по возрастанию индексов.")
+            else:
+                print(sorted_objects)
 
-            result_str = ''.join(obj.mark for obj in sorted_objects)
-            print(f"\nКратко (только метки): {result_str}")
-
-            print("\nПорядок внутри каждой группы сохраняется – видно по возрастанию индексов.")
             # Спросить, продолжать ли
             print("\nХотите выполнить ещё одну сортировку? (y/n):")
             again = input().strip().lower()
